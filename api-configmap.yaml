@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: synergychat-api-configmap
+data:
+  API_PORT: "8080"
+env:
+  - name: API_PORT
+    valueFrom:
+      configMapKeyRef:
+        name: synergychat-api-configmap
+        key: API_PORT
