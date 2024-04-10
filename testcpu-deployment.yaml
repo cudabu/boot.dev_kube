@@ -5,7 +5,6 @@ metadata:
     app: synergychat-testcpu
   name: synergychat-testcpu
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: synergychat-testcpu
@@ -20,3 +19,18 @@ spec:
           resources:
             limits:
               cpu: 50m 
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: testcpu-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: synergychat-testcpu
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 50
