@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: synergychat-api-configmap
+data:
+  API_PORT: "8080"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synergychat-api
+  labels:
+    app: synergychat-api
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: synergychat-api
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: synergychat-api
+    spec:
+      containers:
+      - image: bootdotdev/synergychat-api:latest
+        imagePullPolicy: Always
+        name: synergychat-api
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        env:
+          - name: API_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: synergychat-api-configmap
+                key: API_PORT
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 3
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+spec:
+  type: NodePort
+  selector:
+    app.kubenetes.io/app: synergychat-api
+  ports:
+    - nodePort: 30080
+      port: 80
+      targetPort: 8080
