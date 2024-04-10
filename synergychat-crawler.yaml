@@ -4,8 +4,10 @@ metadata:
   name: synergychat-crawler-configmap
 data:
   CRAWLER_PORT: "8080"
+  CRAWLER_PORT_2: "8081"
+  CRAWLER_PORT_3: "8082"
   CRAWLER_KEYWORDS: "love,hate,joy,sadness,anger,disgust,fear,surprise"
-
+  CRAWLER_DB_PATH: "/cache/db"
 ---
 
 apiVersion: apps/v1
@@ -25,11 +27,46 @@ spec:
     spec:
       containers:
       - image: bootdotdev/synergychat-crawler:latest
-        name: synergychat-crawler
+        name: synergychat-crawler-1
         envFrom:
-          - configMapRef:
-              name: synergychat-crawler-configmap
+        - configMapRef:
+            name: synergychat-crawler-configmap
+        volumeMounts:
+        - name: cache-volume
+          mountPath: /cache
 
+      - image: bootdotdev/synergychat-crawler:latest
+        name: synergychat-crawler-2
+        env:
+          - name: CRAWLER_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: synergychat-crawler-configmap
+                key: CRAWLER_PORT_2
+        envFrom:
+        - configMapRef:
+            name: synergychat-crawler-configmap
+        volumeMounts:
+        - name: cache-volume
+          mountPath: /cache
+
+      - image: bootdotdev/synergychat-crawler:latest
+        name: synergychat-crawler-3
+        env:
+          - name: CRAWLER_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: synergychat-crawler-configmap
+                key: CRAWLER_PORT_3
+        envFrom:
+        - configMapRef:
+            name: synergychat-crawler-configmap
+        volumeMounts:
+        - name: cache-volume
+          mountPath: /cache
+      volumes:
+      - name: cache-volume
+        emptyDir:
 ---
 
 apiVersion: v1
